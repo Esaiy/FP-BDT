@@ -17,7 +17,15 @@ use App\Http\Controllers as Controller;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::group(['middleware' => ['auth']], function() {
+    Route::get('/dashboard', [Controller\DashboardController::class, 'index'])
+        ->middleware(['auth'])
+        ->name('dashboard');
 
-Route::get('/dashboard', [Controller\DashboardController::class, 'index'])->middleware(['auth'])->name('dashboard');
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::resource('category', Controller\CategoryController::class);
+    });
+});
+
 
 require __DIR__.'/auth.php';

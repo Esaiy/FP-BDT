@@ -66,7 +66,7 @@
                     <h4 class="text-section">Master Data</h4>
                 </li>
                 <li class="nav-item">
-                    <a href="#base">
+                    <a href="{{ route('dashboard.category.index') }}">
                         <i class="fas fa-tags"></i>
                         <p>Kategori</p>
                     </a>
