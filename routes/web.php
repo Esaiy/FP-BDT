@@ -24,6 +24,7 @@ Route::group(['middleware' => ['auth']], function() {
 
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::resource('category', Controller\CategoryController::class);
+        Route::resource('article', Controller\ArticleController::class);
     });
 });
 

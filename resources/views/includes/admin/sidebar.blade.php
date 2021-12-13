@@ -72,7 +72,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#base">
+                    <a href="{{ route('dashboard.article.index') }}">
                         <i class="fas fa-list"></i>
                         <p>Artikel</p>
                     </a>
