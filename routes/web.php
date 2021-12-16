@@ -14,9 +14,11 @@ use App\Http\Controllers as Controller;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [Controller\FrontEndController::class, 'index'])->name('home');
+Route::get('/category/{category}', [Controller\FrontEndController::class, 'searchCategory'])->name('category');
+Route::get('/author/{author}', [Controller\FrontEndController::class, 'author'])->name('author');
+Route::get('/search', [Controller\FrontEndController::class, 'searchArticle'])->name('search');
+
 Route::group(['middleware' => ['auth']], function() {
     Route::get('/dashboard', [Controller\DashboardController::class, 'index'])
         ->middleware(['auth'])
