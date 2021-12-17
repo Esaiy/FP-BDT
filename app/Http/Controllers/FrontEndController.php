@@ -13,21 +13,23 @@ class FrontEndController extends Controller
 {
     public function index()
     {
-        if (Redis::get('categories')) {
-            $categories = json_decode(Redis::get('categories'));
+        $redisGet = Redis::connection('read');
+        $redisWrite = Redis::connection('default');
+        if ($redisGet->get('categories')) {
+            $categories = json_decode($redisGet->get('categories'));
         } else {
             $categories = Category::all();
-            Redis::set('categories', json_encode($categories));
+            $redisWrite->set('categories', json_encode($categories));
         }
         
-        if (Redis::get('page:articles:index')) {
-            $articles = json_decode(Redis::get('articles'));
+        if ($redisGet->get('page:articles:index')) {
+            $articles = json_decode($redisGet->get('articles'));
         } else {
             $articles = Article::with(['category','author'])
                 ->orderBy('date', 'desc')
                 ->paginate(15);
 
-            Redis::set('articles', json_encode($articles));
+            $redisWrite->set('page:articles:index', json_encode($articles));
         }
 
         return view('front.article.index', compact('articles', 'categories'));
