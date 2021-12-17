@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\User;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Redis;
 
 
@@ -16,7 +17,6 @@ class FrontEndController extends Controller
         $redisGet = Redis::connection('read');
         $redisWrite = Redis::connection('default');
         if ($redisGet->get('categories')) {
-            echo "true";
             $categories = json_decode($redisGet->get('categories'), true);
         } else {
             $categories = Category::all();
@@ -24,7 +24,9 @@ class FrontEndController extends Controller
         }
         
         if ($redisGet->get('page:articles:index')) {
+            echo "true";
             $articles = json_decode($redisGet->get('articles'), true);
+            $articles = new LengthAwarePaginator($articles['data'], $articles['total'], $articles['per_page'], $articles['current_page']);
         } else {
             $articles = Article::with(['category','author'])
                 ->orderBy('date', 'desc')
@@ -32,7 +34,6 @@ class FrontEndController extends Controller
 
             $redisWrite->set('page:articles:index', json_encode($articles));
         }
-        dd($articles, $categories, $redisGet->get('page:articles:index'));
 
         return view('front.article.index', compact('articles', 'categories'));
     }
