@@ -16,14 +16,15 @@ class FrontEndController extends Controller
         $redisGet = Redis::connection('read');
         $redisWrite = Redis::connection('default');
         if ($redisGet->get('categories')) {
-            $categories = json_decode($redisGet->get('categories'));
+            echo "true";
+            $categories = json_decode($redisGet->get('categories'), true);
         } else {
             $categories = Category::all();
             $redisWrite->set('categories', json_encode($categories));
         }
         
         if ($redisGet->get('page:articles:index')) {
-            $articles = json_decode($redisGet->get('articles'));
+            $articles = json_decode($redisGet->get('articles'), true);
         } else {
             $articles = Article::with(['category','author'])
                 ->orderBy('date', 'desc')
