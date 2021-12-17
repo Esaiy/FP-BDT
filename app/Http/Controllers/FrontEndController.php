@@ -13,6 +13,7 @@ class FrontEndController extends Controller
 {
     public function index()
     {
+        
         $articles = Article::with(['category','author'])
             ->orderBy('date', 'desc')
             ->paginate(15);
