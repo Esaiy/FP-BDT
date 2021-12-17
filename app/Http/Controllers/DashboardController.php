@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Article;
+use App\Models\Category;
 
 class DashboardController extends Controller
 {
@@ -13,7 +15,10 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        return view('admin.dashboard');
+        $articleCount = Article::count();
+        $categoryCount = Category::count();
+        $articles = Article::with(['author', 'category'])->limit(10)->orderBy('date', 'desc')->get();
+        return view('admin.dashboard', compact('articleCount', 'categoryCount', 'articles'));
     }
 
     /**
