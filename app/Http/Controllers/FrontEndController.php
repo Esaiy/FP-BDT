@@ -31,7 +31,7 @@ class FrontEndController extends Controller
 
             $redisWrite->set('page:articles:index', json_encode($articles));
         }
-        dd($articles, $categories);
+        dd($articles, $categories, $redisGet->get('page:articles:index'));
 
         return view('front.article.index', compact('articles', 'categories'));
     }
