@@ -24,8 +24,8 @@ class FrontEndController extends Controller
         }
         
         if ($redisGet->get('page:articles:index')) {
-            $articles = json_decode($redisGet->get('articles'), true);
-            $articles = new LengthAwarePaginator($articles['data'], $articles['total'], $articles['per_page'], $articles['current_page']);
+            $articlesRedis = json_decode($redisGet->get('articles'), true);
+            $articles = new LengthAwarePaginator($articlesRedis['data'], $articlesRedis['total'], $articlesRedis['per_page'], $articlesRedis['current_page']);
         } else {
             $articles = Article::with(['category','author'])
                 ->orderBy('date', 'desc')
