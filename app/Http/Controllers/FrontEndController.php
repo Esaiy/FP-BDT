@@ -71,8 +71,8 @@ class FrontEndController extends Controller
             $page = $request->get('page');
         }
         $category = Category::where('slug', $slug)->first();
-        if ($this->redisGet->get('page:category:' . $page)) {
-            $articlesRedis = json_decode($this->redisGet->get('page:category:' . $page), true);
+        if ($this->redisGet->get('page:category:' . $slug . ":" . $page)) {
+            $articlesRedis = json_decode($this->redisGet->get('page:category:' . $slug . ":" . $page), true);
             $collection = Article::hydrateWith($articlesRedis['data'], ['category', 'author']);
             $collection->flatten();
             $articles = new LengthAwarePaginator($collection, $articlesRedis['total'], $articlesRedis['per_page'], $articlesRedis['current_page']);
@@ -82,7 +82,7 @@ class FrontEndController extends Controller
                 ->orderBy('date', 'desc')
                 ->paginate(15);
 
-            $this->redisWrite->set('page:category:' . $page, json_encode($articles));
+            $this->redisWrite->set('page:category:' . $slug . ":" . $page, json_encode($articles));
         }
 
         return view('front.category.index', compact('articles', 'categories', 'category'));
@@ -96,7 +96,7 @@ class FrontEndController extends Controller
             $page = $request->get('page');
         }
 
-        if ($this->redisGet->get('page:author:' . $page)) {
+        if ($this->redisGet->get('page:author:' . $author->name . ":" . $page)) {
             $articlesRedis = json_decode($this->redisGet->get('page:author:' . $page), true);
             $collection = Article::hydrateWith($articlesRedis['data'], ['category', 'author']);
             $collection->flatten();
@@ -107,7 +107,7 @@ class FrontEndController extends Controller
                 ->orderBy('date', 'desc')
                 ->paginate(15);
 
-            $this->redisWrite->set('page:author:' . $page, json_encode($articles));
+            $this->redisWrite->set('page:author:' . $author->name . ":" . $page, json_encode($articles));
         }
 
         return view('front.author.index', compact('articles', 'categories', 'author'));
