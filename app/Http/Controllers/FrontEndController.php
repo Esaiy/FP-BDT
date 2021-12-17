@@ -12,20 +12,31 @@ use Illuminate\Support\Facades\Redis;
 
 class FrontEndController extends Controller
 {
-    public function index()
+    public function __construct()
     {
-        $redisGet = Redis::connection('read');
-        $redisWrite = Redis::connection('default');
-        if ($redisGet->get('categories')) {
-            $categoriesRedis = json_decode($redisGet->get('categories'), true);
-            $categories = Category::hydrate($categoriesRedis);
+        $this->redisGet = Redis::connection('read');
+        $this->redisWrite = Redis::connection('default');
+
+        if ($this->redisGet->get('categories')) {
+            $categoriesRedis = json_decode($this->redisGet->get('categories'), true);
+            $this->categories = Category::hydrate($categoriesRedis);
         } else {
-            $categories = Category::all();
-            $redisWrite->set('categories', json_encode($categories));
+            $this->categories = Category::all();
+            $this->redisWrite->set('categories', json_encode($this->categories));
+        }
+    }
+
+    public function index(Request $request)
+    {
+        $page = 1;
+        $categories = $this->categories;
+
+        if ($request->get('page')) {
+            $page = $request->get('page');
         }
         
-        if ($redisGet->get('page:articles:index')) {
-            $articlesRedis = json_decode($redisGet->get('page:articles:index'), true);
+        if ($this->redisGet->get('page:articles:index' . $page)) {
+            $articlesRedis = json_decode($this->redisGet->get('page:articles:index:' . $page), true);
             $collection = Article::hydrateWith($articlesRedis['data'], ['category', 'author']);
             $collection->flatten();
             $articles = new LengthAwarePaginator($collection, $articlesRedis['total'], $articlesRedis['per_page'], $articlesRedis['current_page']);
@@ -34,19 +45,16 @@ class FrontEndController extends Controller
                 ->orderBy('date', 'desc')
                 ->paginate(15);
 
-            $redisWrite->set('page:articles:index', json_encode($articles));
+            $this->redisWrite->set('page:articles:index', json_encode($articles));
         }
-        $articlesDB = Article::with(['category','author'])
-                ->orderBy('date', 'desc')
-                ->paginate(15);
 
         return view('front.article.index', compact('articles', 'categories'));
     }
 
     public function searchArticle(Request $request)
     {
+        $categories = $this->categories;
         $keyword = $request->query('q');
-        $categories = Category::all();
         $articles = Article::with(['category','author'])
             ->where('headline', 'like', '%'.$keyword.'%')
             ->orderBy('date', 'desc')
@@ -55,29 +63,52 @@ class FrontEndController extends Controller
         return view('front.article.search', compact('articles', 'categories', 'keyword'));
     }
 
-    public function searchCategory($slug)
+    public function searchCategory(Request $request, $slug)
     {
+        $page = 1;
+        $categories = $this->categories;
+        if ($request->get('page')) {
+            $page = $request->get('page');
+        }
         $category = Category::where('slug', $slug)->first();
-        $categories = Category::all();
-        $articles = Article::with(['category','author'])
-            ->whereHas('category', function($query) use ($slug) {
-                $query->where('slug', $slug);
-            })
-            ->orderBy('date', 'desc')
-            ->paginate(15);
+        if ($this->redisGet->get('page:category:' . $page)) {
+            $articlesRedis = json_decode($this->redisGet->get('page:category:' . $page), true);
+            $collection = Article::hydrateWith($articlesRedis['data'], ['category', 'author']);
+            $collection->flatten();
+            $articles = new LengthAwarePaginator($collection, $articlesRedis['total'], $articlesRedis['per_page'], $articlesRedis['current_page']);
+        } else {
+            $articles = Article::with(['category','author'])
+                ->where('category_id', $category->id)
+                ->orderBy('date', 'desc')
+                ->paginate(15);
+
+            $this->redisWrite->set('page:category:' . $page, json_encode($articles));
+        }
 
         return view('front.category.index', compact('articles', 'categories', 'category'));
     }
 
-    public function author(User $author)
+    public function author(Request $request, User $author)
     {
-        $categories = Category::all();
-        $articles = Article::with(['category','author'])
-            ->whereHas('author', function($query) use ($author) {
-                $query->where('id', $author->id);
-            })
-            ->orderBy('date', 'desc')
-            ->paginate(15);
+        $page = 1;
+        $categories = $this->categories;
+        if ($request->get('page')) {
+            $page = $request->get('page');
+        }
+
+        if ($this->redisGet->get('page:author:' . $page)) {
+            $articlesRedis = json_decode($this->redisGet->get('page:author:' . $page), true);
+            $collection = Article::hydrateWith($articlesRedis['data'], ['category', 'author']);
+            $collection->flatten();
+            $articles = new LengthAwarePaginator($collection, $articlesRedis['total'], $articlesRedis['per_page'], $articlesRedis['current_page']);
+        } else {
+            $articles = Article::with(['category','author'])
+                ->where('author_id', $author->id)
+                ->orderBy('date', 'desc')
+                ->paginate(15);
+
+            $this->redisWrite->set('page:author:' . $page, json_encode($articles));
+        }
 
         return view('front.author.index', compact('articles', 'categories', 'author'));
     }
