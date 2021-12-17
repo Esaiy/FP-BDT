@@ -25,6 +25,7 @@ class FrontEndController extends Controller
         
         if ($redisGet->get('page:articles:index')) {
             $articlesRedis = json_decode($redisGet->get('articles'), true);
+            dd($categories, $redisGet->get('page:articles:index'));
             $articles = new LengthAwarePaginator($articlesRedis['data'], $articlesRedis['total'], $articlesRedis['per_page'], $articlesRedis['current_page']);
         } else {
             $articles = Article::with(['category','author'])
