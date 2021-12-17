@@ -60,5 +60,3 @@ Untuk script konfigurasi HAProxy, MySQL, dan redis terdapat di folder `script`
         ],
 ```
 
-- 
-
