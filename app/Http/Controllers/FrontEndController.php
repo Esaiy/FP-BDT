@@ -26,6 +26,7 @@ class FrontEndController extends Controller
         if ($redisGet->get('page:articles:index')) {
             $articlesRedis = json_decode($redisGet->get('articles'), true);
             // dd($categories, $redisGet->get('page:articles:index'));
+            dd($articlesRedis);
             dd($articlesRedis['data']);
             dd($articlesRedis['current_page']);
             dd($articlesRedis['last_page']);
