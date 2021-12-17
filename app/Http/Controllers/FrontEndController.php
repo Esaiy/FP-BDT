@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\User;
+use Illuminate\Support\Facades\Redis;
 
 
 class FrontEndController extends Controller

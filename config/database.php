@@ -143,6 +143,14 @@ return [
             'database' => env('REDIS_DB', '0'),
         ],
 
+        'write' => [
+            'url' => env('REDIS_URL'),
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT_WRITE', '6380'),
+            'database' => env('REDIS_DB', '0'),
+        ],
+
         'cache' => [
             'url' => env('REDIS_URL'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
