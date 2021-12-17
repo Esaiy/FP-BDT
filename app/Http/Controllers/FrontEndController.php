@@ -17,14 +17,18 @@ class FrontEndController extends Controller
         $redisGet = Redis::connection('read');
         $redisWrite = Redis::connection('default');
         if ($redisGet->get('categories')) {
-            $categories = json_decode($redisGet->get('categories'), true);
+            $categoriesRedis = json_decode($redisGet->get('categories'), true);
+            $categories = Category::hydrate($categoriesRedis);
         } else {
             $categories = Category::all();
             $redisWrite->set('categories', json_encode($categories));
         }
         
         if ($redisGet->get('page:articles:index')) {
-            $articles = json_decode($redisGet->get('page:articles:index'), true);
+            $articlesRedis = json_decode($redisGet->get('page:articles:index'), true);
+            $collection = Article::hydrateWith($articlesRedis['data'], ['category', 'author']);
+            $collection->flatten();
+            $articles = new LengthAwarePaginator($collection, $articlesRedis['total'], $articlesRedis['per_page'], $articlesRedis['current_page']);
         } else {
             $articles = Article::with(['category','author'])
                 ->orderBy('date', 'desc')
@@ -32,6 +36,9 @@ class FrontEndController extends Controller
 
             $redisWrite->set('page:articles:index', json_encode($articles));
         }
+        $articlesDB = Article::with(['category','author'])
+                ->orderBy('date', 'desc')
+                ->paginate(15);
 
         return view('front.article.index', compact('articles', 'categories'));
     }
