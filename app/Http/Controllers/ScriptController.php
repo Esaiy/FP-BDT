@@ -13,7 +13,7 @@ class ScriptController extends Controller
 {
     public function index()
     {
-        $jsonFile = file_get_contents(__DIR__.'\News_Category_Dataset_v2.json');
+        $jsonFile = file_get_contents(__DIR__.'/News_Category_Dataset_v2.json');
 
         $jsonObject = json_decode($jsonFile, true);
 
