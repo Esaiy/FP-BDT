@@ -24,7 +24,7 @@ class FrontEndController extends Controller
         }
         
         if ($redisGet->get('page:articles:index')) {
-            $articlesRedis = json_decode($redisGet->get('page:articles:index'), true);
+            $articles = json_decode($redisGet->get('page:articles:index'), true);
         } else {
             $articles = Article::with(['category','author'])
                 ->orderBy('date', 'desc')
